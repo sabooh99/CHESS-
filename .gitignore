@@ -7,3 +7,7 @@ echo *.ilk >> .gitignore
 echo *.obj >> .gitignore
 echo *.ipch >> .gitignore
 echo *.user >> .gitignore
+echo *.vcxproj >> .gitignore
+echo *.vcxproj.filters >> .gitignore
+echo *.vcxproj.user >> .gitignore
+echo *.slnx >> .gitignore
