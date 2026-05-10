@@ -9,10 +9,16 @@ public:
 
     bool isValidMove(int toRow, int toCol, Board& b) override {
 
+        if (!Piece::inBounds(toRow, toCol))             
+            return false;
+
+        if (toRow == getRow() && toCol == getCol())    
+            return false;
+
         int rowDiff = toRow - getRow();
         int colDiff = toCol - getCol();
 
-        if (rowDiff != colDiff && rowDiff != -colDiff)
+        if (abs(rowDiff) != abs(colDiff))             
             return false;
 
         int rowStep = (rowDiff > 0) ? 1 : -1;
@@ -21,7 +27,7 @@ public:
         int r = getRow() + rowStep;
         int c = getCol() + colStep;
 
-        while (r != toRow && c != toCol) {
+        while (r != toRow || c != toCol) {             
 
             Piece* p = b.getPiece(r, c);
 
