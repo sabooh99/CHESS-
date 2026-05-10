@@ -661,8 +661,10 @@ void runPostMoveChecks(Board& board, const string& currentTurn,
 //  MAIN
 // ============================================================
 int main() {
+
     sf::RenderWindow window(
-        sf::VideoMode(sf::Vector2u(WIN_W, WIN_H)), "Chess");
+        sf::VideoMode(sf::Vector2u(WIN_W, WIN_H)), "Chess",
+        sf::Style::Titlebar | sf::Style::Close);
     window.setFramerateLimit(60);
 
     sf::Font font;
