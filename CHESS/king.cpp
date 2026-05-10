@@ -9,15 +9,11 @@ public:
 
     bool isValidMove(int toRow, int toCol, Board& b) override {
 
-        int rowDiff = toRow - getRow();
+        if (!Piece::inBounds(toRow, toCol))   
+            return false;
 
-        if (rowDiff < 0)
-            rowDiff = -rowDiff;
-
-        int colDiff = toCol - getCol();
-
-        if (colDiff < 0)
-            colDiff = -colDiff;
+        int rowDiff = abs(toRow - getRow());
+        int colDiff = abs(toCol - getCol());
 
         if (rowDiff > 1 || colDiff > 1)
             return false;
@@ -26,19 +22,20 @@ public:
             return false;
 
         Piece* dest = b.getPiece(toRow, toCol);
-
         if (dest != nullptr && dest->getColor() == getColor())
             return false;
-        
-        int oldrow=getrow();
-        int oldcol=getcol();
-        b.simulateMove(oldrow, oldcol, toRow, toCol);
 
-        bool inCheck = b.isInCheck(getColor());
+        for (int r = toRow - 1; r <= toRow + 1; r++) {
+            for (int c = toCol - 1; c <= toCol + 1; c++) {
+                if (r == toRow && c == toCol) continue;
+                if (!Piece::inBounds(r, c)) continue;
+                Piece* p = b.getPiece(r, c);
+                if (p && p->getName() == "king" && p->getColor() != getColor())
+                    return false;
+            }
+        }
 
-        b.undoMove(oldrow, oldcol, toRow, toCol, dest);
-
-        return !inCheck;
+        return true;
     }
 
     string getName() const override {
