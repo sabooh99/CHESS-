@@ -123,6 +123,19 @@ public:
     bool isFiftyMoveRule()        const { return halfMoveClock >= 100; }
     bool isSeventyFiveMoveRule()  const { return halfMoveClock >= 150; }
 
+    bool isSquareAttackedBy(int row, int col, const string& enemyColor) {
+        for (int r = 0; r < 8; r++) {
+            for (int c = 0; c < 8; c++) {
+                Piece* p = grid[r][c];
+                if (p && p->getColor() == enemyColor) {
+                    if (p->isValidMove(row, col, *this))
+                        return true;
+                }
+            }
+        }
+        return false;
+    }
+
     // ======================================================
     // ---------------------- CASTLING ----------------------
     // ======================================================
