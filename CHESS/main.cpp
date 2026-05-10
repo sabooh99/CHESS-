@@ -18,19 +18,20 @@ using namespace std;
 const int TILE = 80;
 const int BOARD_SIZE = 8;
 const int WIN_W = TILE * BOARD_SIZE + 260;
-const int WIN_H = TILE * BOARD_SIZE + 60;
+const int STATUS_H = 50;
+const int WIN_H = TILE * BOARD_SIZE + STATUS_H;
 
-const sf::Color LIGHT_SQ(240, 217, 181);
-const sf::Color DARK_SQ(101, 67, 33);
-const sf::Color SELECTED(255, 255, 0, 200);
-const sf::Color VALID_DOT(50, 205, 50, 180);
-const sf::Color PANEL_BG(15, 15, 25);
-const sf::Color TEXT_COL(255, 255, 255);
-const sf::Color WHITE_PC(255, 255, 255);
-const sf::Color BLACK_PC(20, 20, 20);
-const sf::Color BTN_COL(60, 20, 120);
-const sf::Color BTN_HOV(120, 40, 220);
-const sf::Color GOLD(255, 200, 0);
+const sf::Color LIGHT_SQ(235, 210, 175);   // warm ivory
+const sf::Color DARK_SQ(140, 90, 45);      // warm walnut
+const sf::Color SELECTED(255, 210, 80, 180);  // muted gold highlight
+const sf::Color VALID_DOT(80, 170, 80, 160);  // softer green dot
+const sf::Color PANEL_BG(245, 238, 225);    // warm beige sidebar
+const sf::Color TEXT_COL(60, 45, 30);       // dark warm brown text
+const sf::Color WHITE_PC(240, 220, 185);    // light ivory — for hollow outline white pieces
+const sf::Color BLACK_PC(18, 10, 4);        // near black — for filled solid black pieces
+const sf::Color BTN_COL(180, 140, 90);      // muted gold button
+const sf::Color BTN_HOV(200, 165, 110);     // lighter on hover
+const sf::Color GOLD(160, 110, 50);         // warm brown accent
 
 // ============================================================
 //  SCREEN ENUM
@@ -51,9 +52,10 @@ public:
         box.setSize(sf::Vector2f(w, h));
         box.setPosition(sf::Vector2f(x, y));
         box.setFillColor(BTN_COL);
-        box.setOutlineColor(sf::Color(100, 100, 140));
+        box.setOutlineColor(sf::Color(160, 120, 70, 180));
         box.setOutlineThickness(1);
-        label.setFillColor(TEXT_COL);
+        box.setFillColor(BTN_COL);
+        label.setFillColor(sf::Color(60, 35, 10));  // dark warm text on gold button
         sf::FloatRect bounds = label.getLocalBounds();
         label.setPosition(sf::Vector2f(
             x + (w - bounds.size.x) / 2.f,
@@ -83,7 +85,7 @@ public:
 //  DRAW BACKGROUND
 // ============================================================
 void drawBackground(sf::RenderWindow& win) {
-    win.clear(sf::Color(10, 5, 30));
+    win.clear(sf::Color(240, 232, 215));  // warm cream background
 }
 
 // ============================================================
@@ -141,13 +143,13 @@ void drawNameInput(sf::RenderWindow& win, sf::Font& font,
 
     sf::RectangleShape box1(sf::Vector2f(400, 50));
     box1.setPosition(sf::Vector2f((WIN_W - 400) / 2.f, 235.f));
-    box1.setFillColor(sf::Color(40, 40, 55));
+    box1.setFillColor(sf::Color(255, 248, 235));   // warm cream
     box1.setOutlineThickness(2);
-    box1.setOutlineColor(activeField == 0 ? GOLD : sf::Color(80, 80, 100));
+    box1.setOutlineColor(activeField == 0 ? GOLD : sf::Color(180, 150, 100));
     win.draw(box1);
 
     sf::Text txt1(font, name1 + (activeField == 0 ? "|" : ""), 22);
-    txt1.setFillColor(WHITE_PC);
+    txt1.setFillColor(sf::Color(60, 35, 10));      // dark brown, very readable
     txt1.setPosition(sf::Vector2f((WIN_W - 400) / 2.f + 10.f, 243.f));
     win.draw(txt1);
 
@@ -158,13 +160,13 @@ void drawNameInput(sf::RenderWindow& win, sf::Font& font,
 
     sf::RectangleShape box2(sf::Vector2f(400, 50));
     box2.setPosition(sf::Vector2f((WIN_W - 400) / 2.f, 355.f));
-    box2.setFillColor(sf::Color(40, 40, 55));
+    box2.setFillColor(sf::Color(255, 248, 235));   // warm cream
     box2.setOutlineThickness(2);
-    box2.setOutlineColor(activeField == 1 ? GOLD : sf::Color(80, 80, 100));
+    box2.setOutlineColor(activeField == 1 ? GOLD : sf::Color(180, 150, 100));
     win.draw(box2);
 
     sf::Text txt2(font, name2 + (activeField == 1 ? "|" : ""), 22);
-    txt2.setFillColor(sf::Color(180, 180, 180));
+    txt2.setFillColor(sf::Color(60, 35, 10));      // dark brown, very readable
     txt2.setPosition(sf::Vector2f((WIN_W - 400) / 2.f + 10.f, 363.f));
     win.draw(txt2);
 
@@ -309,7 +311,7 @@ void drawBoard(sf::RenderWindow& win) {
     for (int r = 0; r < 8; r++) {
         for (int c = 0; c < 8; c++) {
             sf::RectangleShape sq(sf::Vector2f(TILE, TILE));
-            sq.setPosition(sf::Vector2f(c * TILE, r * TILE));
+            sq.setPosition(sf::Vector2f(c * TILE, STATUS_H + r * TILE));
             sq.setFillColor((r + c) % 2 == 0 ? LIGHT_SQ : DARK_SQ);
             win.draw(sq);
         }
@@ -318,27 +320,52 @@ void drawBoard(sf::RenderWindow& win) {
 
 void drawHighlight(sf::RenderWindow& win, int row, int col, sf::Color color) {
     sf::RectangleShape sq(sf::Vector2f(TILE, TILE));
-    sq.setPosition(sf::Vector2f(col * TILE, row * TILE));
+    sq.setPosition(sf::Vector2f(col * TILE, STATUS_H + row * TILE));
     sq.setFillColor(color);
     win.draw(sq);
 }
 
-void drawPieces(sf::RenderWindow& win, const Board& b, sf::Font& font) {
+void drawPieces(sf::RenderWindow& win, const Board& b, sf::Font& font, sf::Font& chessFont) {
     for (int r = 0; r < 8; r++) {
         for (int c = 0; c < 8; c++) {
             Piece* p = b.getPiece(r, c);
             if (!p) continue;
 
-            sf::Text shadow(font, string(1, p->getSymbol()), 44);
-            shadow.setFillColor(sf::Color(0, 0, 0, 100));
-            shadow.setStyle(sf::Text::Bold);
-            shadow.setPosition(sf::Vector2f(c * TILE + 18, r * TILE + 12));
+            // Map piece name + color to Unicode chess symbol
+            auto getUnicode = [](const string& name, const string& color) -> sf::String {
+                // Black pieces: ♔♕♖♗♘♙  White pieces: ♚♛♜♝♞♟
+                // U+2654-2659 = hollow outline pieces → use for WHITE
+                // U+265A-265F = filled solid pieces   → use for BLACK
+                if (color == "white") {
+                    if (name == "king")   return sf::String(L"\u2654");
+                    if (name == "queen")  return sf::String(L"\u2655");
+                    if (name == "rook")   return sf::String(L"\u2656");
+                    if (name == "bishop") return sf::String(L"\u2657");
+                    if (name == "knight") return sf::String(L"\u2658");
+                    if (name == "pawn")   return sf::String(L"\u2659");
+                }
+                else {
+                    if (name == "king")   return sf::String(L"\u265A");
+                    if (name == "queen")  return sf::String(L"\u265B");
+                    if (name == "rook")   return sf::String(L"\u265C");
+                    if (name == "bishop") return sf::String(L"\u265D");
+                    if (name == "knight") return sf::String(L"\u265E");
+                    if (name == "pawn")   return sf::String(L"\u265F");
+                }
+                return sf::String(L"?");
+                };
+
+            sf::String sym = getUnicode(p->getName(), p->getColor());
+
+            // soft drop shadow
+            sf::Text shadow(chessFont, sym, 52);
+            shadow.setFillColor(sf::Color(80, 50, 20, 90));
+            shadow.setPosition(sf::Vector2f(c * TILE + 14.f + 2.f, STATUS_H + r * TILE + 6.f + 2.f));
             win.draw(shadow);
 
-            sf::Text txt(font, string(1, p->getSymbol()), 44);
+            sf::Text txt(chessFont, sym, 52);
             txt.setFillColor(p->getColor() == "white" ? WHITE_PC : BLACK_PC);
-            txt.setStyle(sf::Text::Bold);
-            txt.setPosition(sf::Vector2f(c * TILE + 16, r * TILE + 10));
+            txt.setPosition(sf::Vector2f(c * TILE + 14.f, STATUS_H + r * TILE + 6.f));
             win.draw(txt);
         }
     }
@@ -361,7 +388,12 @@ void drawPanel(sf::RenderWindow& win, sf::Font& font,
     sf::RectangleShape panel(sf::Vector2f(260, WIN_H));
     panel.setPosition(sf::Vector2f(px, 0));
     panel.setFillColor(PANEL_BG);
+    // subtle left border line for separation
+    sf::RectangleShape border(sf::Vector2f(2, WIN_H));
+    border.setPosition(sf::Vector2f(px, 0));
+    border.setFillColor(sf::Color(180, 150, 100, 120));
     win.draw(panel);
+    win.draw(border);
 
     sf::Text title(font, "CHESS", 28);
     title.setFillColor(GOLD);
@@ -374,13 +406,15 @@ void drawPanel(sf::RenderWindow& win, sf::Font& font,
     div1.setPosition(sf::Vector2f(px + 10, 58));
     win.draw(div1);
 
-    sf::Text wp(font, "W: " + p1, 18);
-    wp.setFillColor(sf::Color(220, 220, 220));
+    sf::Text wp(font, "WHITE : " + p1, 20);
+    wp.setFillColor(sf::Color(90, 55, 20));    // dark warm brown
+    wp.setStyle(sf::Text::Bold);
     wp.setPosition(sf::Vector2f(px + 10, 70));
     win.draw(wp);
 
-    sf::Text bp(font, "B: " + p2, 18);
-    bp.setFillColor(sf::Color(150, 150, 150));
+    sf::Text bp(font, "BLACK : " + p2, 20);
+    bp.setFillColor(sf::Color(60, 35, 10));    // deeper brown
+    bp.setStyle(sf::Text::Bold);
     bp.setPosition(sf::Vector2f(px + 10, 95));
     win.draw(bp);
 
@@ -395,11 +429,12 @@ void drawPanel(sf::RenderWindow& win, sf::Font& font,
     else if (drawOffered) statusStr = "Draw offered!";
     else                  statusStr = (turn == "white" ? p1 : p2) + "'s turn";
 
-    sf::Text status(font, statusStr, 17);
-    if (gameOver)            status.setFillColor(sf::Color(220, 80, 80));
-    else if (paused)         status.setFillColor(sf::Color(220, 180, 80));
-    else if (drawOffered)    status.setFillColor(sf::Color(220, 180, 80));
-    else                     status.setFillColor(sf::Color(100, 220, 100));
+    sf::Text status(font, statusStr, 18);
+    status.setStyle(sf::Text::Bold);
+    if (gameOver)            status.setFillColor(sf::Color(160, 50, 30));   // deep red
+    else if (paused)         status.setFillColor(sf::Color(140, 90, 30));   // amber brown
+    else if (drawOffered)    status.setFillColor(sf::Color(140, 90, 30));   // amber brown
+    else                     status.setFillColor(sf::Color(80, 50, 15));    // warm dark brown
     status.setPosition(sf::Vector2f(px + 10, 135));
     win.draw(status);
 
@@ -424,31 +459,27 @@ void drawPanel(sf::RenderWindow& win, sf::Font& font,
         btnPause.draw(win, mouse);
     }
 
-    sf::RectangleShape div4(sf::Vector2f(240, 2));
-    div4.setFillColor(sf::Color(80, 80, 100));
-    div4.setPosition(sf::Vector2f(px + 10, 430));
-    win.draw(div4);
-
-    sf::Text legend(font,
-        "K=King  Q=Queen\nR=Rook  B=Bishop\nN=Knight  P=Pawn\n\nUPPER=White\nlower=Black",
-        14);
-    legend.setFillColor(sf::Color(130, 130, 150));
-    legend.setPosition(sf::Vector2f(px + 10, 440));
-    win.draw(legend);
+    // legend removed — pieces are self-explanatory with Unicode symbols
 }
 
 // ============================================================
 //  DRAW STATUS BAR
 // ============================================================
 void drawStatusBar(sf::RenderWindow& win, sf::Font& font, const string& msg) {
-    sf::RectangleShape bar(sf::Vector2f(WIN_W, 40));
-    bar.setPosition(sf::Vector2f(0, BOARD_SIZE * TILE));
-    bar.setFillColor(sf::Color(15, 15, 25));
+    // Draw at TOP (y=0), above the board
+    sf::RectangleShape bar(sf::Vector2f(BOARD_SIZE * TILE, STATUS_H));
+    bar.setPosition(sf::Vector2f(0, 0));
+    bar.setFillColor(sf::Color(100, 65, 25, 220));  // warm dark brown, semi-transparent
     win.draw(bar);
 
-    sf::Text txt(font, msg, 16);
-    txt.setFillColor(sf::Color(180, 180, 200));
-    txt.setPosition(sf::Vector2f(10, BOARD_SIZE * TILE + 10));
+    sf::Text txt(font, msg, 22);
+    txt.setFillColor(sf::Color(255, 235, 185));  // bright warm cream — very readable
+    txt.setStyle(sf::Text::Bold);
+    sf::FloatRect tb = txt.getLocalBounds();
+    txt.setPosition(sf::Vector2f(
+        (BOARD_SIZE * TILE - tb.size.x) / 2.f,
+        (STATUS_H - tb.size.y) / 2.f - 3.f
+    ));
     win.draw(txt);
 }
 
@@ -639,6 +670,11 @@ int main() {
         if (!font.openFromFile("C:/Windows/Fonts/arial.ttf")) {
             return -1;
         }
+    }
+
+    sf::Font chessFont;
+    if (!chessFont.openFromFile("chess_font.ttf")) {
+        chessFont = font; // fallback to same font
     }
 
     Screen currentScreen = MENU;
@@ -850,10 +886,11 @@ int main() {
                         }
                         else if (!paused && !gameOver && !drawOffered &&
                             cp.x < BOARD_SIZE * TILE &&
-                            cp.y < BOARD_SIZE * TILE) {
+                            cp.y >= STATUS_H &&
+                            cp.y < STATUS_H + BOARD_SIZE * TILE) {
 
                             int col = cp.x / TILE;
-                            int row = cp.y / TILE;
+                            int row = (cp.y - STATUS_H) / TILE;
 
                             if (!pieceSelected) {
                                 Piece* p = board.getPiece(row, col);
@@ -972,7 +1009,7 @@ int main() {
                         if (validMoves[r][c])
                             drawHighlight(window, r, c, VALID_DOT);
             }
-            drawPieces(window, board, font);
+            drawPieces(window, board, font,chessFont);
             drawPanel(window, font, currentTurn, player1, player2,
                 moveCount, paused, gameOver, winner, drawOffered,
                 btnSave, btnLoadG, btnPause, btnNewGame,
