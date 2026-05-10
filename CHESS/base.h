@@ -24,12 +24,17 @@ public:
     void setPosition(int r, int c) {
         row = r; col = c;
     }
+
     void markCaptured() {
         isCaptured = true;
     }
 
-    // virtual hook — pieces override if they need to track movement
     virtual void onMoved() {}
+
+    // ======================================================
+    // 🔥 ADDED FOR CASTLING SUPPORT (REQUIRED BY KING/ROOK)
+    // ======================================================
+    virtual bool getHasMoved() const { return false; }
 
     string getColor()    const { return colour; }
     int    getRow()      const { return row; }
@@ -70,7 +75,6 @@ public:
         return grid[r][c];
     }
 
-    // delete existing piece before overwriting to avoid memory leak
     void setPiece(int r, int c, Piece* p) {
         if (grid[r][c] != nullptr)
             delete grid[r][c];
@@ -109,7 +113,6 @@ public:
         grid[fromRow][fromCol] = nullptr;
         grid[toRow][toCol]->setPosition(toRow, toCol);
 
-        // notify the piece it moved — overridden by Pawn/Rook to update internal state
         grid[toRow][toCol]->onMoved();
     }
 
@@ -120,7 +123,31 @@ public:
     bool isFiftyMoveRule()        const { return halfMoveClock >= 100; }
     bool isSeventyFiveMoveRule()  const { return halfMoveClock >= 150; }
 
-    /// caller must save grid[toRow][toCol] before calling — this does not delete it
+    // ======================================================
+    // ---------------------- CASTLING ----------------------
+    // ======================================================
+    void performCastle(int kingRow, int kingCol,
+        int kingToCol,
+        int rookCol, int rookToCol) {
+
+        Piece* king = grid[kingRow][kingCol];
+        Piece* rook = grid[kingRow][rookCol];
+
+        if (!king || !rook) return;
+
+        // move king
+        grid[kingRow][kingToCol] = king;
+        grid[kingRow][kingCol] = nullptr;
+        king->setPosition(kingRow, kingToCol);
+        king->onMoved();
+
+        // move rook
+        grid[kingRow][rookToCol] = rook;
+        grid[kingRow][rookCol] = nullptr;
+        rook->setPosition(kingRow, rookToCol);
+        rook->onMoved();
+    }
+
     void simulateMove(int fromRow, int fromCol, int toRow, int toCol) {
         grid[toRow][toCol] = grid[fromRow][fromCol];
         grid[fromRow][fromCol] = nullptr;
@@ -133,9 +160,9 @@ public:
         grid[toRow][toCol] = captured;
     }
 
-    /// non-const: isValidMove requires Board& so const_cast would be needed otherwise
     bool isInCheck(const string& color) {
         int kingRow = -1, kingCol = -1;
+
         for (int r = 0; r < 8 && kingRow == -1; r++)
             for (int c = 0; c < 8 && kingRow == -1; c++) {
                 Piece* p = grid[r][c];
@@ -143,6 +170,7 @@ public:
                     kingRow = r; kingCol = c;
                 }
             }
+
         if (kingRow == -1) return false;
 
         for (int r = 0; r < 8; r++)
@@ -173,14 +201,17 @@ private:
 
                 for (int tr = 0; tr < 8; tr++) {
                     for (int tc = 0; tc < 8; tc++) {
-                        if (!p->isValidMove(tr, tc, *this)) continue;
+
+                        if (!p->isValidMove(tr, tc, *this))
+                            continue;
 
                         Piece* captured = grid[tr][tc];
                         simulateMove(r, c, tr, tc);
                         bool stillInCheck = isInCheck(color);
                         undoMove(r, c, tr, tc, captured);
 
-                        if (!stillInCheck) return true;
+                        if (!stillInCheck)
+                            return true;
                     }
                 }
             }
