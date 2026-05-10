@@ -9,10 +9,16 @@ public:
 
     bool isValidMove(int toRow, int toCol, Board& b) override {
 
+        if (!Piece::inBounds(toRow, toCol))             
+            return false;
+
+        if (toRow == getRow() && toCol == getCol())      
+            return false;
+
         int rowDiff = toRow - getRow();
         int colDiff = toCol - getCol();
 
-        bool isDiagonal = (rowDiff == colDiff || rowDiff == -colDiff);
+        bool isDiagonal = (abs(rowDiff) == abs(colDiff));
         bool isStraight = (rowDiff == 0 || colDiff == 0);
 
         if (!isDiagonal && !isStraight)
