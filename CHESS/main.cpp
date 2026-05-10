@@ -880,7 +880,7 @@ int main() {
                                     }
                                     else {
                                         // ============================================
-                                        // 🔥 CASTLING DETECTION ADDED HERE
+                                        // CASTLING DETECTION ADDED HERE
                                         // ============================================
 
                                         // Check if this is a castling move (King moving 2 squares)
