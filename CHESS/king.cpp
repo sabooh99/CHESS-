@@ -111,10 +111,11 @@ bool King::isValidMove(int toRow, int toCol, Board& b) {
         }
 
         
-
-        b.simulateMove(getRow(),getCol(), toRow, toCol);
+        int oldRow=getRow();
+        int oldCol=getCol();
+        b.simulateMove(oldRow,oldCol,toRow, toCol);
         bool inCheck = b.isInCheck(getColor());
-        b.undoMove(getRow(), getCol(), toRow, toCol, dest);
+        b.undoMove( oldRow,oldCol,toRow, toCol, dest);
 
         return !inCheck;
     }
