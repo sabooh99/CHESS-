@@ -3,12 +3,12 @@
 #include <iostream>
 #include <string>
 #include "base.h"
-#include "bishop.cpp"
-#include "king.cpp"
-#include "queen.cpp"
-#include "pawn.cpp"
-#include "rook.cpp"
-#include "knight.cpp"
+#include "bishop.h"
+#include "king.h"
+#include "queen.h"
+#include "pawn.h"
+#include "rook.h"
+#include "knight.h"
 
 using namespace std;
 
@@ -879,7 +879,36 @@ int main() {
                                         selRow = selCol = -1;
                                     }
                                     else {
-                                        board.movePieceTo(selRow, selCol, row, col);
+                                        // ============================================
+                                        // 🔥 CASTLING DETECTION ADDED HERE
+                                        // ============================================
+
+                                        // Check if this is a castling move (King moving 2 squares)
+                                        if (p->getName() == "king" && abs(col - selCol) == 2) {
+                                            // This is castling
+                                            int kingRow = selRow;
+                                            int kingCol = selCol;
+                                            int kingToCol = col;
+                                            int rookCol, rookToCol;
+
+                                            if (kingToCol > kingCol) {
+                                                // Kingside castling (O-O)
+                                                rookCol = 7;
+                                                rookToCol = kingToCol - 1;
+                                            }
+                                            else {
+                                                // Queenside castling (O-O-O)
+                                                rookCol = 0;
+                                                rookToCol = kingToCol + 1;
+                                            }
+
+                                            board.performCastle(kingRow, kingCol, kingToCol, rookCol, rookToCol);
+                                        }
+                                        else {
+                                            // Normal move
+                                            board.movePieceTo(selRow, selCol, row, col);
+                                        }
+
                                         moveCount++;
 
                                         // ---- CHECK FOR PROMOTION ----
