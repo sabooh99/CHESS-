@@ -9,10 +9,10 @@ public:
 
     bool isValidMove(int toRow, int toCol, Board& b) override {
 
-        if (!Piece::inBounds(toRow, toCol))             
+        if (!Piece::inBounds(toRow, toCol))              // FIX 1: bounds check
             return false;
 
-        if (toRow == getRow() && toCol == getCol())      
+        if (toRow == getRow() && toCol == getCol())      // FIX 2: same square
             return false;
 
         int rowDiff = toRow - getRow();

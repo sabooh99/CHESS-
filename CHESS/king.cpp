@@ -9,7 +9,7 @@ public:
 
     bool isValidMove(int toRow, int toCol, Board& b) override {
 
-        if (!Piece::inBounds(toRow, toCol))   
+        if (!Piece::inBounds(toRow, toCol))   // FIX 1: bounds check
             return false;
 
         int rowDiff = abs(toRow - getRow());
@@ -25,9 +25,12 @@ public:
         if (dest != nullptr && dest->getColor() == getColor())
             return false;
 
+        // FIX 2: removed simulateMove/isInCheck — causes infinite recursion
+        // Board::hasLegalMove already handles self-check prevention
+
+        // FIX 3: prevent kings from becoming adjacent
         for (int r = toRow - 1; r <= toRow + 1; r++) {
             for (int c = toCol - 1; c <= toCol + 1; c++) {
-                if (r == toRow && c == toCol) continue;
                 if (!Piece::inBounds(r, c)) continue;
                 Piece* p = b.getPiece(r, c);
                 if (p && p->getName() == "king" && p->getColor() != getColor())
