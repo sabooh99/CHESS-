@@ -8,6 +8,6 @@ public:
     char   getSymbol() const override;
     string getName()   const override;
 
-    
+
     bool isValidMove(int toRow, int toCol, Board& b) override;
 };
