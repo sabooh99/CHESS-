@@ -2,7 +2,6 @@
 #include <cmath>
 using namespace std;
 
-
 Knight::Knight(string colour, int row, int col)
     : Piece(colour, row, col) {}
 
