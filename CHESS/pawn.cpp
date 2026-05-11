@@ -14,7 +14,6 @@ char Pawn::getSymbol() const {
 string Pawn::getName() const {
     return "pawn";
 }
-
 void Pawn::onMoved() {
     hasMoved = true;
 }
