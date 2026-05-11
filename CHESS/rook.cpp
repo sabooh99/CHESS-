@@ -17,7 +17,6 @@ string Rook::getName() const {
     return "rook";
 }
 
-
 char Rook::getSymbol() const {
     return (getColor() == "white") ? 'R' : 'r';
 }
