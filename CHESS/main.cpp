@@ -221,7 +221,6 @@ void drawRules(sf::RenderWindow& win, sf::Font& font,
 
     btnBack.draw(win, mouse);
 }
-
 // ============================================================
 //  SETUP BOARD
 // ============================================================
