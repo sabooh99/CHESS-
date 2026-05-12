@@ -519,7 +519,7 @@ bool checkPromotionNeeded(Board& b, int row, int col) {
 //  Darkens the board, then shows a centered panel with 4 choices.
 //  pieceColor is "white" or "black" — symbols rendered accordingly.
 // ============================================================
-void drawPromotionOverlay(sf::RenderWindow& win, sf::Font& font,
+void drawPromotionOverlay(sf::RenderWindow& win, sf::Font& font,sf::Font& chessFont
     const string& pieceColor, sf::Vector2i mouse)
 {
     // --- dim overlay covering the whole board area ---
@@ -534,7 +534,7 @@ void drawPromotionOverlay(sf::RenderWindow& win, sf::Font& font,
 
     sf::RectangleShape panel(sf::Vector2f(PW, PH));
     panel.setPosition(sf::Vector2f(PX, PY));
-    panel.setFillColor(sf::Color(20, 15, 40, 245));
+    panel.setFillColor(sf::Color(45,28,12,245));
     panel.setOutlineColor(GOLD);
     panel.setOutlineThickness(2);
     win.draw(panel);
@@ -547,16 +547,14 @@ void drawPromotionOverlay(sf::RenderWindow& win, sf::Font& font,
     win.draw(heading);
 
     // 4 choice boxes: Queen, Rook, Bishop, Knight
-    // symbols and labels match your existing piece symbol convention
-    struct Choice { char sym; const char* label; };
-    // symbols: uppercase = white, lowercase = black (matching your drawPieces logic)
+    struct Choice { sf::String sym; const char* label; };
     Choice choices[4] = {
-        { (pieceColor == "white" ? 'Q' : 'q'), "Queen"  },
-        { (pieceColor == "white" ? 'R' : 'r'), "Rook"   },
-        { (pieceColor == "white" ? 'B' : 'b'), "Bishop" },
-        { (pieceColor == "white" ? 'N' : 'n'), "Knight" }
-    };
-
+    { pieceColor == "white" ? sf::String(L"\u2655") : sf::String(L"\u265B"), "Queen"  },
+    { pieceColor == "white" ? sf::String(L"\u2656") : sf::String(L"\u265C"), "Rook"   },
+    { pieceColor == "white" ? sf::String(L"\u2657") : sf::String(L"\u265D"), "Bishop" },
+    { pieceColor == "white" ? sf::String(L"\u2658") : sf::String(L"\u265E"), "Knight" }
+};
+    
     const float BOX_W = 70.f, BOX_H = 90.f;
     const float GAP = 16.f;
     float totalW = 4 * BOX_W + 3 * GAP;
@@ -572,15 +570,13 @@ void drawPromotionOverlay(sf::RenderWindow& win, sf::Font& font,
 
         sf::RectangleShape box(sf::Vector2f(BOX_W, BOX_H));
         box.setPosition(sf::Vector2f(bx, by));
-        box.setFillColor(hovered ? sf::Color(80, 40, 160) : sf::Color(40, 25, 80));
-        box.setOutlineColor(hovered ? GOLD : sf::Color(80, 80, 120));
+        box.setFillColor(hovered ? sf::Color(180,140,90) : sf::Color(100,65,25));
+        box.setOutlineColor(hovered ? GOLD : sf::Color(160,120,70,180));
         box.setOutlineThickness(hovered ? 2.f : 1.f);
         win.draw(box);
 
-        // piece symbol
-        sf::Text sym(font, string(1, choices[i].sym), 38);
+        sf::Text sym(chessFont, choices[i].sym, 48);
         sym.setFillColor(pieceColor == "white" ? WHITE_PC : BLACK_PC);
-        sym.setStyle(sf::Text::Bold);
         sf::FloatRect sb = sym.getLocalBounds();
         sym.setPosition(sf::Vector2f(bx + (BOX_W - sb.size.x) / 2.f - 2.f,
             by + 8.f));
@@ -819,24 +815,15 @@ int main() {
                         // ================================================
                         if (promotionPending) {
                             string chosen = getPromotionChoice(cp, PX, PY, PW, PH);
-                            if (!chosen.empty()) {
-                                // delete the pawn and place the chosen piece
-                                Piece* pawn = board.getPiece(promoRow, promoCol);
-                                delete pawn;
-
-                                Piece* newPiece = makePiece(chosen, promoColor,
-                                    promoRow, promoCol);
-                                board.setPiece(promoRow, promoCol, newPiece);
-
-                                promotionPending = false;
-
-                                // NOW switch turn and run post-move checks
-                                currentTurn = (currentTurn == "white") ? "black" : "white";
-                                runPostMoveChecks(board, currentTurn,
-                                    player1, player2,
-                                    gameOver, winner,
-                                    statusMsg, drawOffered);
-                            }
+                       if (!chosen.empty()) {
+                           // setPiece clean up the old pawn
+                           Piece* newPiece = makePiece(chosen, promoColor, promoRow, promoCol);
+                           board.setPiece(promoRow, promoCol, newPiece);  // setPiece delete old piece internally
+                           promotionPending = false;
+                           currentTurn = (currentTurn == "white") ? "black" : "white";
+                           runPostMoveChecks(board, currentTurn, player1, player2,
+                               gameOver, winner, statusMsg, drawOffered);
+}
                             // if click missed all boxes → do nothing, keep overlay open
                             continue;  // skip all other click handling this frame
                         }
@@ -1019,7 +1006,7 @@ int main() {
 
             // draw promotion overlay on top of everything else
             if (promotionPending) {
-                drawPromotionOverlay(window, font, promoColor, mouse);
+                drawPromotionOverlay(window, font,chessFont, promoColor, mouse);
             }
         }
 
